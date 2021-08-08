@@ -28,13 +28,13 @@ app = Flask(__name__)
 
 @app.route('/audio', methods=['POST'])
 def get_audio():
+    start_time = time.time()
     json_data = request.get_json()
     text = json_data['text']
 
     print(text)
     try:
         with torch.no_grad():
-            start_time = time.time()
             wav, c, *_ = text2speech(text)
             wav = vocoder.inference(c)
     except:
