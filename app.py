@@ -7,7 +7,7 @@ from parallel_wavegan.utils import download_pretrained_model
 from parallel_wavegan.utils import load_model
 from flask import Flask, send_file, request
 
-sample_rate = 23000
+sample_rate = 24000
 lang = 'Japanese'
 model_tag = 'kan-bayashi/jsut_conformer_fastspeech2_accent_with_pause' 
 vocoder_tag = "jsut_parallel_wavegan.v1" 
@@ -16,19 +16,11 @@ downloader = ModelDownloader()
 
 text2speech = Text2Speech(
     **downloader.download_and_unpack(model_tag),
-    device="cpu",
-    # Only for Tacotron 2
-    threshold=0.5,
-    minlenratio=0.0,
-    maxlenratio=10.0,
-    use_att_constraint=False,
-    backward_window=1,
-    forward_window=3,
-    # Only for FastSpeech & FastSpeech2
+    device="cuda",
     speed_control_alpha=1.0,
 )
 text2speech.spc2wav = None
-vocoder = load_model(download_pretrained_model(vocoder_tag)).eval()
+vocoder = load_model(download_pretrained_model(vocoder_tag)).to("cuda").eval()
 vocoder.remove_weight_norm()
 
 
@@ -37,7 +29,7 @@ app = Flask(__name__)
 @app.route('/audio', methods=['POST'])
 def get_audio():
     json_data = request.get_json()
-    text = json_data['text']
+    text = json_data['text'].rstrip('\x00')
 
     with torch.no_grad():
         start_time = time.time()
