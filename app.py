@@ -29,15 +29,17 @@ app = Flask(__name__)
 @app.route('/audio', methods=['POST'])
 def get_audio():
     json_data = request.get_json()
-    text = json_data['text'].rstrip('\x00')
+    text = json_data['text']
 
-    with torch.no_grad():
-        start_time = time.time()
-        wav, c, *_ = text2speech(text)
-        wav = vocoder.inference(c)
-
-    rtf = (time.time() - start_time) / (len(wav)/sample_rate)
-    print(f"RTF = {rtf:5f}")
+    print(text)
+    try:
+        with torch.no_grad():
+            start_time = time.time()
+            wav, c, *_ = text2speech(text)
+            wav = vocoder.inference(c)
+    except:
+        torch.cuda.empty_cache() 
+        return "Speech generation failed", 500
 
     file_name = f"tmp/{start_time}_{text[:10]}.wav"
     sf.write(file_name, wav.view(-1).cpu().numpy(), sample_rate, "PCM_16")
