@@ -41,7 +41,7 @@ def get_audio():
         torch.cuda.empty_cache() 
         return "Speech generation failed", 500
 
-    file_name = f"{tempfile.gettempdir()}/{start_time}_{text[:10]}.wav"
+    file_name = f"{tempfile.gettempdir()}/{start_time}.wav"
     sf.write(file_name, wav.view(-1).cpu().numpy(), SAMPLE_RATE, "PCM_16")
 
     return send_file(file_name)
