@@ -27,3 +27,4 @@ returns a `.wav` file for this text
 - [ ] Configure to run inside Docker
 - [ ] Run server in production mode
 - [ ] Support languages other than Japanese
+- [ ] Implement streaming response
