@@ -21,6 +21,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
         liblzma-dev \
         libsndfile1-dev \
         patch \
+        python3 \
         software-properties-common \
         sox \
         subversion \
@@ -28,21 +29,28 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
         wget \
         zip \
         zlib1g-dev \
-        python2.7 \
-        python3.7 \
-        python3-pip \
-        python3-setuptools \
-        python3-dev \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN python3.7 -m pip install -U pip setuptools wheel
+ENV DEBIAN_FRONTEND=noninteractive 
+
+RUN add-apt-repository universe
+RUN apt-get update -y
+
+RUN apt-get -y install python-pip
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3
+
+RUN apt-get -y install locales locales-all
+
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 COPY ./requirements.txt ./requirements.txt
-
-RUN  python3.7 -m pip install -r ./requirements.txt
+RUN  pip install -r ./requirements.txt
+RUN pip install pyopenjtalk
 
 COPY . .
 
-CMD flask run
+CMD flask run --host=0.0.0.0
