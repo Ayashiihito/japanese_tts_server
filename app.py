@@ -12,15 +12,15 @@ SAMPLE_RATE = 24000
 MODEL_TAG = 'kan-bayashi/jsut_conformer_fastspeech2_accent_with_pause' 
 VOCODER_TAG = "jsut_parallel_wavegan.v1" 
 
-downloader = ModelDownloader()
+downloader = ModelDownloader('./models/')
 
 text2speech = Text2Speech(
     **downloader.download_and_unpack(MODEL_TAG),
-    device = "cuda",
+    device = "cpu",
     speed_control_alpha = 1.0,
 )
 text2speech.spc2wav = None
-vocoder = load_model(download_pretrained_model(VOCODER_TAG)).to("cuda").eval()
+vocoder = load_model(download_pretrained_model(VOCODER_TAG)).to("cpu").eval()
 vocoder.remove_weight_norm()
 
 
@@ -38,11 +38,9 @@ def get_audio():
             wav, c, *_ = text2speech(text)
             wav = vocoder.inference(c)
     except:
-        torch.cuda.empty_cache() 
         return "Speech generation failed", 500
 
     file_name = f"{tempfile.gettempdir()}/{start_time}.wav"
-    sf.write(file_name, wav.view(-1).cpu().numpy(), SAMPLE_RATE, "PCM_16")
+    sf.write(file_name, wav.view(-1).numpy(), SAMPLE_RATE, "PCM_16")
 
     return send_file(file_name)
-
