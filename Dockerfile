@@ -39,7 +39,7 @@ RUN add-apt-repository universe
 RUN apt-get update -y
 
 RUN apt-get -y install python-pip
-RUN curl https://bootstrap.pypa.io/get-pip.py | python3
+RUN curl https://bootstrap.pypa.io/pip/3.6/get-pip.py | python3
 
 RUN apt-get -y install locales locales-all
 
